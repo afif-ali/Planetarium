@@ -1,6 +1,7 @@
 #include "Shader.h"
 
 
+
 int Shader::CompileVertexShader(const char* source, unsigned int* shader) {
     *shader = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(*shader, 1, &source, NULL);
@@ -31,8 +32,34 @@ int Shader::CompileFragmentShader(const char* source, unsigned int* shader) {
     return 0;
 }
 
-Shader::Shader(const char* vs_source, const char* fs_source)
+Shader::Shader(const char* vs_path, const char* fs_path)
 {
+    std::string vs_code;
+    std::string fs_code;
+    std::ifstream vs_file;
+    std::ifstream fs_file;
+    
+    vs_file.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    fs_file.exceptions (std::ifstream::failbit | std::ifstream::badbit);
+    try 
+    {
+        vs_file.open(vs_path);
+        fs_file.open(fs_path);
+        std::stringstream vShaderStream, fShaderStream;
+        vShaderStream << vs_file.rdbuf();
+        fShaderStream << fs_file.rdbuf();		
+        vs_file.close();
+        fs_file.close();
+        vs_code = vShaderStream.str();
+        fs_code = fShaderStream.str();		
+    }
+    catch(std::ifstream::failure e)
+    {
+        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+    }
+    const char* vs_source = vs_code.c_str();
+    const char* fs_source = fs_code.c_str();
+    
     unsigned int vertexShader;
     if (CompileVertexShader(vs_source, &vertexShader) == 0)
         std::cout << "SUCCESS" << std::endl;
@@ -57,7 +84,7 @@ Shader::Shader(const char* vs_source, const char* fs_source)
     if(!success)
     {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cerr << "ERROR: " << infoLog << std::endl;
+        std::cout << "ERROR: " << infoLog << std::endl;
     }
     else
         std::cout << "SUCCESS" << std::endl;
