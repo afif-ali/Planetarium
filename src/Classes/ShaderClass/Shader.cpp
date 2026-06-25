@@ -93,12 +93,12 @@ Shader::Shader(const char* vs_path, const char* fs_path)
     glDeleteShader(vertexShader);
 }
 
+Shader::~Shader()
+{
+    glDeleteProgram(ID);
+}
+
 void Shader::Use()
 {
     glUseProgram(ID);
-}
-
-void Shader::Delete()
-{
-    glDeleteProgram(ID);
 }

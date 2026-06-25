@@ -19,7 +19,7 @@ private:
 
 public:
     Shader(const char* vs_path, const char* fs_path);
+    ~Shader();
 
     void Use();
-    void Delete();
 };
