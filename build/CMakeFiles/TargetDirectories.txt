@@ -1,3 +1,0 @@
-C:/Dev/Planetaruim/build/CMakeFiles/Planetarium.dir
-C:/Dev/Planetaruim/build/CMakeFiles/edit_cache.dir
-C:/Dev/Planetaruim/build/CMakeFiles/rebuild_cache.dir
