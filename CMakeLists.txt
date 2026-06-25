@@ -7,9 +7,11 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(lib/glfw-3.4)
 
-include_directories(${PROJECT_NAME} lib/glad/include/ lib/glfw-3.4/include/)
+include_directories(${PROJECT_NAME} lib/glad/include/ lib/glfw-3.4/include/ src/)
 
-add_executable(${PROJECT_NAME} src/main.cpp lib/glad/src/glad.c)
+
+file(GLOB_RECURSE MY_SOURCES "src/*.cpp")
+add_executable(${PROJECT_NAME} ${MY_SOURCES} lib/glad/src/glad.c)
 
 target_link_libraries(${PROJECT_NAME} glfw)
 

@@ -3,6 +3,8 @@
 
 #include <iostream>
 
+#include "Classes/ShaderClass/Shader.h"
+
 void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
     glViewport(0, 0, width, height);
@@ -54,64 +56,7 @@ int main()
         "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
         "}\0";
 
-    unsigned int vertexShader;
-    vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &vs_source, NULL);
-    glCompileShader(vertexShader);
-    
-    int  vs_success;
-    char vs_infoLog[512];
-    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &vs_success);
-    if(!vs_success)
-    {
-        glGetShaderInfoLog(vertexShader, 512, NULL, vs_infoLog);
-        std::cout << "ERROR: Failed to compile vertex shader!\n" << vs_infoLog << std::endl;
-    }
-    else
-    {
-        std::cout << "Successfully compiled VEREX SHADER!" << std::endl;
-    }
-
-    unsigned int fragmentShader;
-    fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragmentShader, 1, &fs_source, NULL);
-    glCompileShader(fragmentShader);
-    
-    int  fs_success;
-    char fs_infoLog[512];
-    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &fs_success);
-    if(!fs_success)
-    {
-        glGetShaderInfoLog(fragmentShader, 512, NULL, fs_infoLog);
-        std::cout << "ERROR: Failed to compile fragment shader!\n" << fs_infoLog << std::endl;
-    }
-    else
-    {
-        std::cout << "Successfully compiled FRAGMENT SHADER!" << std::endl;
-    }
-
-    unsigned int shaderProgram;
-    shaderProgram = glCreateProgram();
-
-    glAttachShader(shaderProgram, fragmentShader);
-    glAttachShader(shaderProgram, vertexShader);
-    glLinkProgram(shaderProgram);
-
-    int  prg_success;
-    char prg_infoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &prg_success);
-    if(!prg_success)
-    {
-        glGetProgramInfoLog(shaderProgram, 512, NULL, prg_infoLog);
-        std::cerr << "ERROR: Failed to link shader program!\n" << prg_infoLog << std::endl;
-    }
-    else
-    {
-        std::cout << "Successfully linked SHADER PROGRAM!" << std::endl;
-    }
-
-    glDeleteShader(fragmentShader);
-    glDeleteShader(vertexShader);
+    Shader shader(vs_source, fs_source);
 
     float vertices[] = {
         0.5f,  0.5f, 0.0f,  // top right
@@ -152,7 +97,7 @@ int main()
     {
         glClear(GL_COLOR_BUFFER_BIT);
         
-        glUseProgram(shaderProgram);
+        shader.Use();
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0);
         glBindVertexArray(0);
@@ -161,6 +106,10 @@ int main()
         glfwPollEvents();
     }
 
+    glDeleteBuffers(1, &VBO);
+    glDeleteBuffers(1, &EBO);
+    glDeleteVertexArrays(1, &VAO);
+    shader.Delete();
     glfwTerminate();
     return 0;
 }
