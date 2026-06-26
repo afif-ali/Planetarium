@@ -1,5 +1,6 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <stb_image.h>
 
 #include <iostream>
 
@@ -7,12 +8,15 @@
 #include "Classes/VBOClass/VBO.h"
 #include "Classes/EBOClass/EBO.h"
 #include "Classes/ShaderClass/Shader.h"
+#include "Classes/TextureClass/Texture.h"
+
 
 float vertices[] = {
-    0.5f,  0.5f, 0.0f,  // top right
-    0.5f, -0.5f, 0.0f,  // bottom right
-    -0.5f, -0.5f, 0.0f,  // bottom left
-    -0.5f,  0.5f, 0.0f   // top left 
+    // positions          // colors           // texture coords
+     0.5f,  0.5f, 0.0f,   1.0f, 0.0f, 0.0f,   1.0f, 1.0f,   // top right
+     0.5f, -0.5f, 0.0f,   0.0f, 1.0f, 0.0f,   1.0f, 0.0f,   // bottom right
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f, 1.0f,   0.0f, 0.0f,   // bottom left
+    -0.5f,  0.5f, 0.0f,   1.0f, 1.0f, 0.0f,   0.0f, 1.0f    // top left 
 };
 unsigned int indices[] = {  // note that we start from 0!
     0, 1, 3,   // first triangle
@@ -57,25 +61,32 @@ int main()
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
 
     {
+        
         Shader shader("./res/vert.glsl", "./res/frag.glsl");
         
         VAO vao;
         vao.Bind();
-
+        
         VBO vbo(vertices, sizeof(vertices));
         EBO ebo(indices, sizeof(indices));
-
-        vao.LinkVBO(vbo, 0);
+        
+        vao.LinkAttribute(vbo, 0, 3, GL_FLOAT, 8*sizeof(float), (void*)0);
+        vao.LinkAttribute(vbo, 1, 3, GL_FLOAT, 8*sizeof(float), (void*)(3 * sizeof(float)));
+        vao.LinkAttribute(vbo, 2, 2, GL_FLOAT, 8*sizeof(float), (void*)(6 * sizeof(float)));
+        
         vao.Unbind();
         vbo.Unbind();
         ebo.Unbind();
-    
+        
+        Texture texture("rita.png", GL_TEXTURE_2D, 0, GL_RGBA);
+        texture.texUnit(shader, "ourTexture", 0);
         
         while (!glfwWindowShouldClose(window))
         {
             glClear(GL_COLOR_BUFFER_BIT);
             
             shader.Use();
+            texture.Bind();
             vao.Bind();
             glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
