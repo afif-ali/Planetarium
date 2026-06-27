@@ -12,6 +12,7 @@
 #include "Classes/EBOClass/EBO.h"
 #include "Classes/ShaderClass/Shader.h"
 #include "Classes/TextureClass/Texture.h"
+#include "Classes/WindowClass/Window.h"
 
 
 float vertices[] = {
@@ -77,11 +78,6 @@ unsigned int indices[] = {
     33, 34, 35
 };
 
-void framebuffer_size_callback(GLFWwindow* window, int width, int height)
-{
-    glViewport(0, 0, width, height);
-}
-
 int main()
 {
     if (!glfwInit())
@@ -93,27 +89,9 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
+    Window window(800, 800, "Planetarium");
     
-    GLFWwindow* window = glfwCreateWindow(800, 600, "Planetarium", NULL, NULL);
-    if (window == NULL)
-    {
-        std::cout << "ERROR: Failed to open window!" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
 
-    glfwMakeContextCurrent(window);
-
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
-    {
-        std::cout << "ERROR: Failed to initialize GLAD!" << std::endl;
-        glfwTerminate();
-        return -1;
-    }
-    glViewport(0, 0, 800, 600);
-    glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-    glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-    glEnable(GL_DEPTH_TEST);
 
     {
         Shader shader("./res/vert.glsl", "./res/frag.glsl");
@@ -144,7 +122,7 @@ int main()
         glm::mat4 projection;
         projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
         
-        while (!glfwWindowShouldClose(window))
+        while (window.isOpen())
         {
             glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
             
@@ -160,7 +138,7 @@ int main()
             vao.Bind();
             glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0);
 
-            glfwSwapBuffers(window);
+            glfwSwapBuffers(window.ID);
             glfwPollEvents();
         }
     }
