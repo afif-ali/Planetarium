@@ -23,6 +23,18 @@ void Mesh::Draw()
 {
     material->shader->Use();
     material->Update();
+
+    glm::mat4 model = glm::mat4(1.0f);
+    model = glm::translate(model, position);
+    model = glm::translate(model, position);
+
+    model = glm::rotate(model, glm::radians(rotation.x), {1,0,0});
+    model = glm::rotate(model, glm::radians(rotation.y), {0,1,0});
+    model = glm::rotate(model, glm::radians(rotation.z), {0,0,1});
+
+    model = glm::scale(model, scale);
+    glUniformMatrix4fv(material->shader->Uniform("model"), 1, GL_FALSE, glm::value_ptr(model));
+
     vao.Bind();
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
 };

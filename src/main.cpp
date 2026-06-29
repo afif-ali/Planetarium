@@ -93,9 +93,8 @@ void Engine::Run()
     cube.material->albedo = glm::vec3(1.0, 0.0, 0.0);
     cube.material->useTexture = true;
     cube.material->texture = std::make_unique<Texture>("wall.jpg", GL_TEXTURE_2D, 0, GL_RGB);
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
+    
+    cube.rotation.x = 20;
 
     glm::mat4 view = glm::mat4(1.0f);
     view = glm::translate(view, glm::vec3(0.0f, 0.0f, -3.0f));
@@ -107,10 +106,9 @@ void Engine::Run()
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        cube.rotation.y += 0.001;
         
         cube.material->shader->Use();
-        glUniformMatrix4fv(cube.material->shader->Uniform("model"), 1, GL_FALSE, glm::value_ptr(model));
         glUniformMatrix4fv(cube.material->shader->Uniform("view"), 1, GL_FALSE, glm::value_ptr(view));
         glUniformMatrix4fv(cube.material->shader->Uniform("projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
