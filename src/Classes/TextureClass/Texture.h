@@ -9,11 +9,12 @@ class Texture
 public:
     unsigned int ID;
     GLenum type;
+    unsigned int slot;
 
     Texture(const char *image, GLenum texType, unsigned int slot, GLenum format);
     ~Texture();
 
-    void texUnit(Shader shader, const char* uniform, unsigned int unit);
+    void texUnit(Shader shader, const char* uniform);
     void Bind();
     void Unbind();
 };

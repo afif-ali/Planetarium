@@ -3,6 +3,7 @@
 Texture::Texture(const char *image, GLenum texType, unsigned int slot, GLenum format)
 {
     type = texType;
+    this->slot = slot;
     glGenTextures(1, &ID);
     glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(texType, ID);
@@ -31,11 +32,10 @@ Texture::~Texture()
     glDeleteTextures(1, &ID);
 }
 
-void Texture::texUnit(Shader shader, const char *uniform, unsigned int unit)
+void Texture::texUnit(Shader shader, const char *uniform)
 {
-    unsigned int tex_uniform = glGetUniformLocation(shader.ID, uniform);
     shader.Use();
-    glUniform1i(tex_uniform, unit);
+    glUniform1i(shader.Uniform(uniform), slot);
 }
 
 void Texture::Bind()

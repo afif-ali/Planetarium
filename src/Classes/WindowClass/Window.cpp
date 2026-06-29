@@ -20,7 +20,6 @@ Window::Window(unsigned int width, unsigned int height, const char *title)
     m_Title = title;
 
     glfwMakeContextCurrent(ID);
-    std::cout << "test" << std::endl;
     
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {

@@ -55,22 +55,22 @@ Shader::Shader(const char* vs_path, const char* fs_path)
     }
     catch(std::ifstream::failure e)
     {
-        std::cout << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
+        std::cout << "ERROR: Failed to read shader file (VERT: " << vs_path << " FRAG: " << fs_path << ")" << std::endl;
     }
     const char* vs_source = vs_code.c_str();
     const char* fs_source = fs_code.c_str();
     
     unsigned int vertexShader;
     if (CompileVertexShader(vs_source, &vertexShader) == 0)
-        std::cout << "SUCCESS" << std::endl;
+        std::cout << "SUCCESS: Compiled vertex shader (" << vs_path << ")" << std::endl;
     else
-        std::cout << "ERROR: " << infoLog << std::endl;
+        std::cout << "ERROR: Failed to compile vertex shader (" << vs_path << ") : " << infoLog << std::endl;
 
     unsigned int fragmentShader;
     if (CompileFragmentShader(fs_source, &fragmentShader) == 0)
-        std::cout << "SUCCESS" << std::endl;
+        std::cout << "SUCCESS: Compiled fragment shader (" << fs_path << ")" << std::endl;
     else
-        std::cout << "ERROR: " << infoLog << std::endl;
+        std::cout << "ERROR: Failed to compile fragment shader (" << fs_path << ") : " << infoLog << std::endl;
     
 
     ID = glCreateProgram();
@@ -84,10 +84,10 @@ Shader::Shader(const char* vs_path, const char* fs_path)
     if(!success)
     {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cout << "ERROR: " << infoLog << std::endl;
+        std::cout << "ERROR: Failed to link shader program (VERT: " << vs_path << " FRAG: " << fs_path << ") : " << infoLog << std::endl;
     }
     else
-        std::cout << "SUCCESS" << std::endl;
+        std::cout << "SUCCESS: Linked shader program (VERT: " << vs_path << " FRAG: " << fs_path << ")" << std::endl;
 
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);
@@ -101,4 +101,9 @@ Shader::~Shader()
 void Shader::Use()
 {
     glUseProgram(ID);
+}
+
+int Shader::Uniform(const char *uniform)
+{
+    return glGetUniformLocation(ID, uniform);
 }

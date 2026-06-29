@@ -6,60 +6,59 @@
 #include <glm/gtc/type_ptr.hpp>
 
 #include <iostream>
+#include <vector>
 
-#include "Classes/VAOClass/VAO.h"
-#include "Classes/VBOClass/VBO.h"
-#include "Classes/EBOClass/EBO.h"
+#include "Classes/MeshClass/Mesh.h"
+#include "Classes/MaterialClass/Material.h"
 #include "Classes/ShaderClass/Shader.h"
 #include "Classes/TextureClass/Texture.h"
-#include "Classes/WindowClass/Window.h"
 #include "Classes/EngineClass/Engine.h"
 
 
-float vertices[] = {
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
+std::vector<Vertex> vertices = {
+    {glm::vec3( -0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
+    {glm::vec3(  0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3(  0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3(  0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3( -0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3( -0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
 
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
+    {glm::vec3( -0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
+    {glm::vec3(  0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3(  0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3(  0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3( -0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3( -0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
 
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    {glm::vec3( -0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3( -0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3( -0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3( -0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3( -0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
+    {glm::vec3( -0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
 
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+    {glm::vec3(  0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3(  0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3(  0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3(  0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3(  0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
+    {glm::vec3(  0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
 
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f, -0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f, -0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f, -0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f, -0.5f, -0.5f,  0.0f, 1.0f,
+    {glm::vec3( -0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3(  0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3(  0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3(  0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3( -0.5f, -0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
+    {glm::vec3( -0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
 
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f,
-     0.5f,  0.5f, -0.5f,  1.0f, 1.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-     0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
-    -0.5f,  0.5f,  0.5f,  0.0f, 0.0f,
-    -0.5f,  0.5f, -0.5f,  0.0f, 1.0f
+    {glm::vec3( -0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )},
+    {glm::vec3(  0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 1.0f )},
+    {glm::vec3(  0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3(  0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 1.0f, 0.0f )},
+    {glm::vec3( -0.5f,  0.5f,  0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
+    {glm::vec3( -0.5f,  0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 1.0f )}
 };
-unsigned int indices[] = {
+std::vector<unsigned int> indices = {
     0, 1, 2,
     3, 4, 5,
 
@@ -89,27 +88,12 @@ int main()
 }
 
 void Engine::Run()
-{
-    
-    VAO vao;
-    vao.Bind();
-    
-    VBO vbo(vertices, sizeof(vertices));
-    EBO ebo(indices, sizeof(indices));
-    
-    vao.LinkAttribute(vbo, 0, 3, GL_FLOAT, 5*sizeof(float), (void*)0);
-    vao.LinkAttribute(vbo, 2, 2, GL_FLOAT, 5*sizeof(float), (void*)(3 * sizeof(float)));
-    
-    vao.Unbind();
-    vbo.Unbind();
-    ebo.Unbind();
-    
-    Shader shader("./res/vert.glsl", "./res/frag.glsl");
-    
-    Texture texture("wall.jpg", GL_TEXTURE_2D, 0, GL_RGB);
-    texture.texUnit(shader, "ourTexture", 0);
+{   
+    Mesh cube(vertices, indices, std::make_unique<BasicMaterial>( std::make_unique<Shader>("./res/vert.glsl", "./res/frag.glsl") ));
+    cube.material->albedo = glm::vec3(1.0, 0.0, 0.0);
+    cube.material->useTexture = true;
+    cube.material->texture = std::make_unique<Texture>("wall.jpg", GL_TEXTURE_2D, 0, GL_RGB);
 
-    
     glm::mat4 model = glm::mat4(1.0f);
     model = glm::rotate(model, glm::radians(-55.0f), glm::vec3(1.0f, 0.0f, 0.0f)); 
 
@@ -122,18 +106,15 @@ void Engine::Run()
     while (window->isOpen())
     {
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        
-        
-        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(1.0f), glm::vec3(0.5f, 1.0f, 0.0f));  
-        
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "model"), 1, GL_FALSE, glm::value_ptr(model));
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(glGetUniformLocation(shader.ID, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
 
-        shader.Use();
-        texture.Bind();
-        vao.Bind();
-        glDrawElements(GL_TRIANGLES, sizeof(indices)/sizeof(unsigned int), GL_UNSIGNED_INT, 0);
+        model = glm::rotate(model, (float)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.5f, 1.0f, 0.0f));
+        
+        cube.material->shader->Use();
+        glUniformMatrix4fv(cube.material->shader->Uniform("model"), 1, GL_FALSE, glm::value_ptr(model));
+        glUniformMatrix4fv(cube.material->shader->Uniform("view"), 1, GL_FALSE, glm::value_ptr(view));
+        glUniformMatrix4fv(cube.material->shader->Uniform("projection"), 1, GL_FALSE, glm::value_ptr(projection));
+
+        cube.Draw();
 
         glfwSwapBuffers(window->ID);
         glfwPollEvents();
