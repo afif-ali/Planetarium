@@ -25,6 +25,7 @@ private:
     VAO vao;
     std::unique_ptr<VBO> vbo;
     std::unique_ptr<EBO> ebo;
+    glm::mat4 model = glm::mat4(1.0f);
 
 public:
     std::vector<Vertex> vertices;

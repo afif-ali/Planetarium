@@ -12,11 +12,17 @@
 
 class Engine
 {
+private:
+    static float lastX;
+    static float lastY;
+    static bool firstMouse;
+
+    static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+
 public:
-    std::unique_ptr<Window> window;
+    static std::unique_ptr<Window> window;
 
-    ~Engine();
-
-    void Init(unsigned int height, unsigned int width, const char* title);
-    void Run();
+    static void Init(unsigned int height, unsigned int width, const char* title);
+    static void Run();
+    static void MouseMovement(float xoffset, float yoffset);
 };

@@ -14,7 +14,7 @@ public:
     Texture(const char *image, GLenum texType, unsigned int slot, GLenum format);
     ~Texture();
 
-    void texUnit(Shader shader, const char* uniform);
+    void texUnit(Shader& shader, const char* uniform);
     void Bind();
     void Unbind();
 };

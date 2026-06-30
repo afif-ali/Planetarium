@@ -32,7 +32,7 @@ Texture::~Texture()
     glDeleteTextures(1, &ID);
 }
 
-void Texture::texUnit(Shader shader, const char *uniform)
+void Texture::texUnit(Shader& shader, const char *uniform)
 {
     shader.Use();
     glUniform1i(shader.Uniform(uniform), slot);

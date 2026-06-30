@@ -21,11 +21,9 @@ Mesh::Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std:
 }
 void Mesh::Draw()
 {
-    material->shader->Use();
     material->Update();
-
-    glm::mat4 model = glm::mat4(1.0f);
-    model = glm::translate(model, position);
+    
+    model = glm::mat4(1.0f);
     model = glm::translate(model, position);
 
     model = glm::rotate(model, glm::radians(rotation.x), {1,0,0});
@@ -37,4 +35,7 @@ void Mesh::Draw()
 
     vao.Bind();
     glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
+
+    GLint currentProgram;
+    glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 };
