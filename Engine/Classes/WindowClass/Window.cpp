@@ -52,8 +52,8 @@ const char *Window::getTitle()
     return m_Title;
 }
 
-void Window::setTitle(const char *title)
+void Window::setTitle(std::string title)
 {
-    glfwSetWindowTitle(ID, title);
-    m_Title = title;
+    glfwSetWindowTitle(ID, title.c_str());
+    m_Title = title.c_str();
 }

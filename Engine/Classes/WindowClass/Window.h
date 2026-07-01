@@ -24,5 +24,5 @@ public:
     unsigned int getWidth();
     unsigned int getHeight();
     const char* getTitle();
-    void setTitle(const char* title);
+    void setTitle(std::string title);
 };

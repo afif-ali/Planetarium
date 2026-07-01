@@ -1,20 +1,4 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
-
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
-
-#include <iostream>
-#include <vector>
-
-#include "Classes/MeshClass/Mesh.h"
-#include "Classes/MaterialClass/Material.h"
-#include "Classes/ShaderClass/Shader.h"
-#include "Classes/TextureClass/Texture.h"
-#include "Classes/EngineClass/Engine.h"
-
-
+#include <Engine.h>
 
 std::vector<Vertex> vertices = {
     {glm::vec3( -0.5f, -0.5f, -0.5f ),glm::vec3( 1.0f, 1.0f, 1.0f ),glm::vec2( 0.0f, 0.0f )},
@@ -79,71 +63,38 @@ std::vector<unsigned int> indices = {
     33, 34, 35
 };
 
-int main()
-{
-    Engine::Init(800, 800, "Planetarium");
-    Engine::Run();
-    glfwTerminate();
-    return 0;
-}
+const float CAMERA_RADIUS = 5.0f;
 
 float yaw = 0.0;
 float pitch = 0.0;
 
-void Engine::Run()
-{   
-    std::unique_ptr<Mesh> cube = std::make_unique<Mesh>(vertices, indices, std::make_unique<BasicMaterial>( std::make_unique<Shader>("./res/vert.glsl", "./res/frag.glsl") ));
-    cube->material->albedo = glm::vec3(1.0, 0.0, 0.0);
-    cube->material->useTexture = true;
-    cube->material->texture = std::make_unique<Texture>("wall.jpg", GL_TEXTURE_2D, 0, GL_RGB);
+glm::vec3 cameraTarget;
 
-    std::unique_ptr<Mesh> greencube = std::make_unique<Mesh>(vertices, indices, std::make_unique<BasicMaterial>( std::make_unique<Shader>("./res/vert.glsl", "./res/frag.glsl") ));
-    greencube->material->albedo = glm::vec3(0.0, 1.0, 0.0);
-    greencube->material->useTexture = true;
-    greencube->material->texture = std::make_unique<Texture>("wall.jpg", GL_TEXTURE_2D, 0, GL_RGB);
+void Engine::Begin()
+{
+    meshes["cube"] = std::make_unique<Mesh>(vertices, indices, std::make_unique<BasicMaterial>( std::make_unique<Shader>("res/shaders/vert.glsl", "res/shaders/frag.glsl") ));
+    meshes["cube"]->material->albedo = glm::vec3(1.0, 0.0, 0.0);
+    meshes["cube"]->material->useTexture = true;
+    meshes["cube"]->material->texture = std::make_unique<Texture>("res/textures/wall.jpg", GL_TEXTURE_2D, 0, GL_RGB);
 
-    greencube->position.x = 2.0f;
+    meshes["greencube"] = std::make_unique<Mesh>(vertices, indices, std::make_unique<BasicMaterial>( std::make_unique<Shader>("res/shaders/vert.glsl", "res/shaders/frag.glsl") ));
+    meshes["greencube"]->material->albedo = glm::vec3(0.0, 1.0, 0.0);
+    meshes["greencube"]->material->useTexture = true;
+    meshes["greencube"]->material->texture = std::make_unique<Texture>("res/textures/wall.jpg", GL_TEXTURE_2D, 0, GL_RGB);
 
+    meshes["greencube"]->position.x = 5.0f;
 
-    glfwSetInputMode(window->ID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glm::mat4 view = glm::mat4(1.0f);
+    cameraTarget = meshes["cube"]->position;
     
-    glm::mat4 projection;
-    projection = glm::perspective(glm::radians(60.0f), 800.0f / 600.0f, 0.1f, 100.0f);
-    
-    glm::vec3 worldUp = glm::vec3(0.0f, 1.0f, 0.0f);
+    float camX = sin(glm::radians(yaw)) * cos(glm::radians(pitch)) * CAMERA_RADIUS;
+    float camY = sin(glm::radians(pitch)) * CAMERA_RADIUS;
+    float camZ = cos(glm::radians(yaw)) * cos(glm::radians(pitch)) * CAMERA_RADIUS;
+    view = glm::lookAt(glm::vec3(camX, camY, camZ) + cameraTarget, cameraTarget, glm::vec3(0.0, 1.0, 0.0));
+}
 
-    glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 3.0f);
-    glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-
-    glm::vec3 cameraDir = glm::normalize(cameraPos - cameraTarget);
-    glm::vec3 cameraRight = glm::normalize(glm::cross(worldUp, cameraDir));
-    glm::vec3 cameraUp = glm::cross(cameraDir, cameraRight);
-
-    while (window->isOpen())
-    {
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-        const float radius = 5.0f;
-        float camX = sin(glm::radians(yaw)) * cos(glm::radians(pitch)) * radius;
-        float camY = sin(glm::radians(pitch)) * radius;
-        float camZ = cos(glm::radians(yaw)) * cos(glm::radians(pitch)) * radius;
-        view = glm::lookAt(glm::vec3(camX, camY, camZ), glm::vec3(0.0, 0.0, 0.0), glm::vec3(0.0, 1.0, 0.0));
-        
-        cube->material->shader->Use();
-        glUniformMatrix4fv(cube->material->shader->Uniform("view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(cube->material->shader->Uniform("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        greencube->material->shader->Use();
-        glUniformMatrix4fv(greencube->material->shader->Uniform("view"), 1, GL_FALSE, glm::value_ptr(view));
-        glUniformMatrix4fv(greencube->material->shader->Uniform("projection"), 1, GL_FALSE, glm::value_ptr(projection));
-        
-        cube->Draw();
-        greencube->Draw();
-
-
-        glfwSwapBuffers(window->ID);
-        glfwPollEvents();
-    }
+void Engine::Update(float delta)
+{
+    window->setTitle("Planetarium: " + std::to_string(delta) + " | FPS: " + std::to_string(fps));
 }
 
 void Engine::MouseMovement(float xoffset, float yoffset)
@@ -157,4 +108,8 @@ void Engine::MouseMovement(float xoffset, float yoffset)
     else
         pitch -= yoffset * 0.1;
 
+    float camX = sin(glm::radians(yaw)) * cos(glm::radians(pitch)) * CAMERA_RADIUS;
+    float camY = sin(glm::radians(pitch)) * CAMERA_RADIUS;
+    float camZ = cos(glm::radians(yaw)) * cos(glm::radians(pitch)) * CAMERA_RADIUS;
+    view = glm::lookAt(glm::vec3(camX, camY, camZ) + cameraTarget, cameraTarget, glm::vec3(0.0, 1.0, 0.0));
 }

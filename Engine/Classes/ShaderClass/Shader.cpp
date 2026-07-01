@@ -84,10 +84,10 @@ Shader::Shader(const char* vs_path, const char* fs_path)
     if(!success)
     {
         glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cout << "ERROR: Failed to link shader program (VERT: " << vs_path << " FRAG: " << fs_path << ") : " << infoLog << std::endl;
+        std::cout << "ERROR: Failed to link shader program (VERT: " << vs_path << " FRAG: " << fs_path << ") : " << infoLog << std::endl << std::endl;
     }
     else
-        std::cout << "SUCCESS: Linked shader program (VERT: " << vs_path << " FRAG: " << fs_path << ")" << std::endl;
+        std::cout << "SUCCESS: Linked shader program (VERT: " << vs_path << " FRAG: " << fs_path << ")" << std::endl << std::endl;
 
     glDeleteShader(fragmentShader);
     glDeleteShader(vertexShader);

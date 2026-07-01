@@ -7,11 +7,12 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 add_subdirectory(lib/glfw-3.4)
 
-include_directories(${PROJECT_NAME} lib/glad/include/ lib/glfw-3.4/include/ lib/stb_image/ lib/ src/)
+include_directories(${PROJECT_NAME} lib/glad/include/ lib/glfw-3.4/include/ lib/stb_image/ lib/ Engine/ src/)
 
 
-file(GLOB_RECURSE MY_SOURCES "src/*.cpp")
-add_executable(${PROJECT_NAME} ${MY_SOURCES} lib/glad/src/glad.c lib/stb_image/stb_image.cpp)
+file(GLOB_RECURSE ENGINE_SOURCES "Engine/*.cpp")
+file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp")
+add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${PROJECT_SOURCES} lib/glad/src/glad.c lib/stb_image/stb_image.cpp)
 
 target_link_libraries(${PROJECT_NAME} glfw)
 
@@ -30,4 +31,11 @@ add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${MINGW_DLLS}
     $<TARGET_FILE_DIR:${PROJECT_NAME}>
+
+    COMMAND ${CMAKE_COMMAND} -E remove_directory
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/res
+
+    COMMAND ${CMAKE_COMMAND} -E copy_directory
+    ${CMAKE_SOURCE_DIR}/res
+    $<TARGET_FILE_DIR:${PROJECT_NAME}>/res
 )
