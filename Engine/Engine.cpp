@@ -29,6 +29,9 @@ void Engine::Init(unsigned int height, unsigned int width, const char *title)
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     window = std::make_unique<Window>(height, width, title);
+    
+    glEnable(GL_CULL_FACE);
+    glCullFace(GL_BACK);
 
     lastX = width / 2;
     lastY = height / 2;
