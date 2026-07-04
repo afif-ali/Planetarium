@@ -27,15 +27,17 @@ set(MINGW_DLLS
     "${MINGW_BIN_DIR}/libwinpthread-1.dll"
 )
 
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+add_custom_target(copy_resources ALL
     COMMAND ${CMAKE_COMMAND} -E copy_if_different
     ${MINGW_DLLS}
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>
+    ${CMAKE_BINARY_DIR}
 
     COMMAND ${CMAKE_COMMAND} -E remove_directory
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>/res
+    ${CMAKE_BINARY_DIR}/res
 
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${CMAKE_SOURCE_DIR}/res
-    $<TARGET_FILE_DIR:${PROJECT_NAME}>/res
+    ${CMAKE_BINARY_DIR}/res
 )
+
+add_dependencies(${PROJECT_NAME} copy_resources)

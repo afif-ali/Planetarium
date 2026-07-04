@@ -18,6 +18,7 @@ public:
     glm::vec3 albedo = glm::vec3(1.0f, 1.0f, 1.0f);
     std::unique_ptr<Texture> texture = nullptr;
     bool useTexture = false;
+    bool glow = false;
     
     BasicMaterial(std::unique_ptr<Shader> shader);
     void Update();

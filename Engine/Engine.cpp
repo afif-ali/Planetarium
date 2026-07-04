@@ -74,7 +74,7 @@ void Engine::Run()
         
         Engine::Update(delta);
 
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) Engine::window->getWidth() / Engine::window->getHeight(), 0.1f, 100.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) Engine::window->getWidth() / Engine::window->getHeight(), 0.1f, 1000.0f);
         for (const auto& [key, mesh] : meshes) {
             mesh->material->shader->Use();
             glUniformMatrix4fv(mesh->material->shader->Uniform("view"), 1, GL_FALSE, glm::value_ptr(view));

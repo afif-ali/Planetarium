@@ -4,9 +4,8 @@
 
 class CelestialBody
 {
-private:
-    std::string meshID;
 public:
+    std::string meshID;
     float mass;
     float radius;
     glm::vec2 position;

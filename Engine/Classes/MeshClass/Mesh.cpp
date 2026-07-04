@@ -34,8 +34,10 @@ void Mesh::Draw()
     glUniformMatrix4fv(material->shader->Uniform("model"), 1, GL_FALSE, glm::value_ptr(model));
 
     vao.Bind();
-    glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
-
+    if (DrawLines)
+        glDrawElements(GL_LINES, indices.size(), GL_UNSIGNED_INT, 0);
+    else
+        glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
     GLint currentProgram;
     glGetIntegerv(GL_CURRENT_PROGRAM, &currentProgram);
 };

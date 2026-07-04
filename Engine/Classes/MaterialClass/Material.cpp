@@ -16,4 +16,5 @@ void BasicMaterial::Update()
         texture->Bind();
     }
     glUniform1i(shader->Uniform("u_useTexture"), useTexture);
+    glUniform1i(shader->Uniform("glow"), glow);
 }
