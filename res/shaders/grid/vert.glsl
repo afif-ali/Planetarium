@@ -1,7 +1,8 @@
-#version 330 core
+#version 460 core
 layout (location = 0) in vec3 aPos;
 layout (location = 1) in vec3 aColor;
-layout (location = 2) in vec2 aTexCoord;
+layout (location = 2) in vec3 aNormal;
+layout (location = 3) in vec2 aTexCoord;
 
 out vec3 Color;
 out vec2 TexCoord;
@@ -51,7 +52,7 @@ void main()
 
 
         float h = flamm(r, rs) - flamm(edgeDistance, rs);
-        height += (h * masses[i].intensity * 0.02) / (1.5 * r);
+        height += (h * masses[i].intensity * 0.01) / (1.5 * r);
     }
 
     gl_Position = projection * view * model * vec4(aPos.x, height, aPos.z, 1.0);

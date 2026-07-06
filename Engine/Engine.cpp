@@ -44,7 +44,7 @@ void Engine::Run()
     Engine::Begin();
     
     glfwSetInputMode(window->ID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-    glfwSwapInterval(1);
+    //glfwSwapInterval(1);
 
     float lastFrame = 0.0f;
 
@@ -74,7 +74,7 @@ void Engine::Run()
         
         Engine::Update(delta);
 
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), (float) Engine::window->getWidth() / Engine::window->getHeight(), 0.1f, 1000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), ((float) Engine::window->getWidth() - Engine::window->viewportOffsetLeft - Engine::window->viewportOffsetRight) / (Engine::window->getHeight() - Engine::window->viewportOffsetBottom - Engine::window->viewportOffsetTop), 0.1f, 1000.0f);
         for (const auto& [key, mesh] : meshes) {
             mesh->material->shader->Use();
             glUniformMatrix4fv(mesh->material->shader->Uniform("view"), 1, GL_FALSE, glm::value_ptr(view));
@@ -83,7 +83,10 @@ void Engine::Run()
             mesh->Draw();
         }
 
+        Engine::UpdateUI(delta);
+
         glfwSwapBuffers(window->ID);
         glfwPollEvents();
     }
+    Engine::End();
 }

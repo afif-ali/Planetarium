@@ -18,7 +18,7 @@ std::pair<std::vector<Vertex>, std::vector<unsigned int>> getSphereData(float ra
             float u = -1*(float)j / sub_horizontal +1;
             float v = (float)i / sub_vertical;
 
-            vertices.push_back({glm::vec3(x,y,z),glm::vec3(1.0,1.0,1.0),glm::vec2(u,v)});
+            vertices.push_back({glm::vec3(x,y,z),glm::vec3(1.0,1.0,1.0),glm::normalize(glm::vec3(x,y,z)),glm::vec2(u,v)});
         }
     }
 

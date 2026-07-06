@@ -3,7 +3,9 @@
 
 void Window::framebuffer_size_callback(GLFWwindow* window, int width, int height)
 {
-    glViewport(0, 0, width, height);
+    m_Width = width;
+    m_Height = height;
+    updateViewport();
 }
 
 Window::Window(unsigned int width, unsigned int height, const char *title)
@@ -26,7 +28,7 @@ Window::Window(unsigned int width, unsigned int height, const char *title)
         std::cout << "ERROR: Failed to initialize GLAD!" << std::endl;
         glfwTerminate();
     }
-    glViewport(0, 0, width, height);
+    updateViewport();
     glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
     glfwSetFramebufferSizeCallback(ID, framebuffer_size_callback);
     glEnable(GL_DEPTH_TEST);
@@ -35,6 +37,11 @@ Window::Window(unsigned int width, unsigned int height, const char *title)
 bool Window::isOpen()
 {
     return !glfwWindowShouldClose(ID);
+}
+
+void Window::updateViewport()
+{
+    glViewport(viewportOffsetLeft, viewportOffsetBottom, m_Width - viewportOffsetLeft - viewportOffsetRight, m_Height - viewportOffsetBottom - viewportOffsetTop); 
 }
 
 unsigned int Window::getWidth()
