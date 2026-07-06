@@ -1,8 +1,9 @@
 #include "CelestialBody.h"
 
 
-CelestialBody::CelestialBody(std::string meshID, float mass, float radius, glm::vec2 start_position, glm::vec2 initial_velocity)
+CelestialBody::CelestialBody(std::string name, std::string meshID, float mass, float radius, glm::vec2 start_position, glm::vec2 initial_velocity)
 {
+    this->name = name;
     this->meshID = meshID;
     this->mass = mass;
     this->radius = radius;

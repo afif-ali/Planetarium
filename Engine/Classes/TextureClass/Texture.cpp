@@ -5,16 +5,14 @@ Texture::Texture(const char *image, GLenum texType, unsigned int slot, GLenum fo
     type = texType;
     this->slot = slot;
     glGenTextures(1, &ID);
-    glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(texType, ID);
     
     glTexParameteri(texType, GL_TEXTURE_WRAP_S, GL_REPEAT);	
     glTexParameteri(texType, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(texType, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(texType, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    
-    int width, height, nrChannels;
-    stbi_set_flip_vertically_on_load(true);
+
+    stbi_set_flip_vertically_on_load(false);
     unsigned char *data = stbi_load(image, &width, &height, &nrChannels, 0);
     if (data)
     {
@@ -40,6 +38,7 @@ void Texture::texUnit(Shader& shader, const char *uniform)
 
 void Texture::Bind()
 {
+    glActiveTexture(GL_TEXTURE0 + slot);
     glBindTexture(GL_TEXTURE_2D, ID);
 }
 

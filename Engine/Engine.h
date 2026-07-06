@@ -7,6 +7,7 @@
 #include <iostream>
 #include <memory>
 #include <unordered_map>
+#include <map>
 
 #include "Classes/WindowClass/Window.h"
 #include "Classes/MeshClass/Mesh.h"
@@ -30,6 +31,7 @@ public:
     inline static glm::mat4 view = glm::mat4(1.0);
     inline static std::unordered_map<std::string, std::unique_ptr<Mesh>> meshes{};
     inline static std::unordered_map<std::string, std::unique_ptr<Light>> lights{};
+    inline static std::map<std::string, std::shared_ptr<Texture>> textures{};
 
     inline static unsigned int fps = 0;
 

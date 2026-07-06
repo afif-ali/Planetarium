@@ -1,24 +1,31 @@
 #include "imgui.h"
 #include "imgui_impl_glfw.h"
 #include "imgui_impl_opengl3.h"
+#include "imgui_stdlib.h"
 
 #include <Engine.h>
+
+#include <cfloat>
 
 #include "Sphere/Sphere.h"
 #include "Grid/Grid.h"
 #include "CelestialBody/CelestialBody.h"
 
+
+
 const float CAMERA_RADIUS = 15.0f;
 const float GRAVITATIONAL_CONSTANT = 9.8;
-const float SIMULATION_SPEED = 0.2;
+const float SIMULATION_SPEED = 0.0;
 const unsigned int PANEL_WIDTH = 300;
 
+glm::vec3 cameraTarget;
 float yaw = 0.0;
 float pitch = 20.0;
 
-glm::vec3 cameraTarget;
-std::vector<std::unique_ptr<CelestialBody>> celestial_bodies;
+std::pair<std::vector<Vertex>, std::vector<unsigned int>> sphereData = getSphereData(24, 24);
 
+std::vector<std::unique_ptr<CelestialBody>> celestial_bodies;
+int bodyID = 0;
 
 
 void applyGravity(CelestialBody& a, CelestialBody& b)
@@ -38,50 +45,38 @@ void Engine::Begin()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void) io;
-    ImGui::StyleColorsDark();
+    ImGui::StyleColorsClassic();
     ImGui_ImplGlfw_InitForOpenGL(window->ID, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
     window->viewportOffsetLeft = PANEL_WIDTH;
+    window->viewportOffsetRight = PANEL_WIDTH;
     window->updateViewport();
 
-    std::shared_ptr<Texture> earthTex = std::make_shared<Texture>("res/textures/earth.jpg", GL_TEXTURE_2D, 0, GL_RGB);
+    textures["earth"] = std::make_shared<Texture>("res/textures/earth.jpg", GL_TEXTURE_2D, 0, GL_RGB);
+    textures["earth-night"] = std::make_shared<Texture>("res/textures/earth-night.jpg", GL_TEXTURE_2D, 1, GL_RGB);
+    textures["sun"] = std::make_shared<Texture>("res/textures/sun.jpg", GL_TEXTURE_2D, 2, GL_RGB);
+    textures["moon"] = std::make_shared<Texture>("res/textures/moon.jpg", GL_TEXTURE_2D, 3, GL_RGB);
+    textures["mercury"] = std::make_shared<Texture>("res/textures/mercury.jpg", GL_TEXTURE_2D, 4, GL_RGB);
+    textures["venus"] = std::make_shared<Texture>("res/textures/venus.jpg", GL_TEXTURE_2D, 5, GL_RGB);
+    textures["mars"] = std::make_shared<Texture>("res/textures/mars.jpg", GL_TEXTURE_2D, 6, GL_RGB);
+    textures["jupiter"] = std::make_shared<Texture>("res/textures/jupiter.jpg", GL_TEXTURE_2D, 7, GL_RGB);
+    textures["saturn"] = std::make_shared<Texture>("res/textures/saturn.jpg", GL_TEXTURE_2D, 8, GL_RGB);
+    textures["uranus"] = std::make_shared<Texture>("res/textures/uranus.jpg", GL_TEXTURE_2D, 9, GL_RGB);
+    textures["neptune"] = std::make_shared<Texture>("res/textures/neptune.jpg", GL_TEXTURE_2D, 10, GL_RGB);
+    textures["ceres"] = std::make_shared<Texture>("res/textures/ceres.jpg", GL_TEXTURE_2D, 11, GL_RGB);
+    textures["haumea"] = std::make_shared<Texture>("res/textures/haumea.jpg", GL_TEXTURE_2D, 12, GL_RGB);
+    textures["makemake"] = std::make_shared<Texture>("res/textures/makemake.jpg", GL_TEXTURE_2D, 13, GL_RGB);
+    textures["eris"] = std::make_shared<Texture>("res/textures/eris.jpg", GL_TEXTURE_2D, 14, GL_RGB);
 
-    std::cout << "test" << std::endl;
     std::pair<std::vector<Vertex>, std::vector<unsigned int>> gridData = getGridData(1000, 2.0);
     meshes["grid"] = std::make_unique<Mesh>(gridData.first, gridData.second, std::make_unique<BasicMaterial>( std::make_unique<Shader>("res/shaders/grid/vert.glsl", "res/shaders/grid/frag.glsl") ));
     meshes["grid"]->DrawLines = true;
     meshes["grid"]->material->parameter["gridRadius"] = 2000.0f;
-
-    std::pair<std::vector<Vertex>, std::vector<unsigned int>> earthSphereData = getSphereData(1, 24, 24);
-
-    meshes["earth"] = std::make_unique<Mesh>(earthSphereData.first, earthSphereData.second, std::make_unique<BasicMaterial>( std::make_unique<Shader>("res/shaders/vert.glsl", "res/shaders/frag.glsl") ));
-    meshes["earth"]->material->parameter["isLightSource"] = false;
-    meshes["earth"]->material->parameter["material.albedo"] = glm::vec3(1.0);
-    meshes["earth"]->material->parameter["material.useDiffuse"] = true;
-    meshes["earth"]->material->parameter["material.diffuse"] = earthTex;
-    meshes["earth"]->material->parameter["material.specular"] = glm::vec3(0.5, 0.5, 0.5);
-    meshes["earth"]->material->parameter["material.shininess"] = 32.0f;
-    meshes["earth"]->position.x = 40.0;
-
-    celestial_bodies.push_back(std::make_unique<CelestialBody>("earth", 1.0, 1.0, glm::vec2(meshes["earth"]->position.x, meshes["earth"]->position.z), glm::vec2(0.0, -20.0)));
-
-    std::pair<std::vector<Vertex>, std::vector<unsigned int>> sunSphereData = getSphereData(5, 48, 48);
-
-    meshes["sun"] = std::make_unique<Mesh>(sunSphereData.first, sunSphereData.second, std::make_unique<BasicMaterial>( std::make_unique<Shader>("res/shaders/vert.glsl", "res/shaders/frag.glsl") ));
-    meshes["sun"]->material->parameter["isLightSource"] = true;
-    meshes["sun"]->material->parameter["material.albedo"] = glm::vec3(1.0f, 1.0f, 0.0f);
-    meshes["sun"]->position.x = 0.0;
-    lights["sun"] = std::make_unique<Light>();
-    lights["sun"]->ambient = glm::vec3(0.2);
-    lights["sun"]->diffuse = glm::vec3(0.2);
-    lights["sun"]->specular = glm::vec3(1.0);
-    lights["sun"]->constant = 1.0;
-    lights["sun"]->linear = 0.0014;
-    lights["sun"]->quadratic = 0.000007;
-
-    celestial_bodies.push_back(std::make_unique<CelestialBody>("sun", 50.0, 5.0, glm::vec2(meshes["sun"]->position.x, meshes["sun"]->position.z), glm::vec2(0.0, 0.0)));
 }
+
+
+CelestialBody* selectedBody = nullptr;
 
 void Engine::Update(float delta)
 {
@@ -96,13 +91,16 @@ void Engine::Update(float delta)
     float camZ = cos(glm::radians(yaw)) * cos(glm::radians(pitch)) * CAMERA_RADIUS;
 
     // Calculate all gravity interactions
-    for (int i=0; i<celestial_bodies.size(); i++)
+    if (SIMULATION_SPEED < 0.0)
     {
-        for (int j=0; j<celestial_bodies.size(); j++)
+        for (int i=0; i<celestial_bodies.size(); i++)
         {
-            if (i==j) continue;
+            for (int j=0; j<celestial_bodies.size(); j++)
+            {
+                if (i==j) continue;
 
-            applyGravity(*celestial_bodies[i], *celestial_bodies[j]);
+                applyGravity(*celestial_bodies[i], *celestial_bodies[j]);
+            }
         }
     }
 
@@ -118,7 +116,8 @@ void Engine::Update(float delta)
         meshes["grid"]->material->parameter[(base + ".position").c_str()] = celestial_bodies[i]->position;
         meshes["grid"]->material->parameter[(base + ".intensity").c_str()] = celestial_bodies[i]->mass;
         meshes["grid"]->material->parameter[(base + ".radius").c_str()] = celestial_bodies[i]->radius;
-
+        
+        meshes[celestial_bodies[i]->meshID]->material->parameter["radius"] = celestial_bodies[i]->radius;
         meshes[celestial_bodies[i]->meshID]->material->parameter["viewPos"] = glm::vec3(camX, camY, camZ) + cameraTarget;
         meshes[celestial_bodies[i]->meshID]->material->parameter["lightCount"] = (int) lights.size();
     }
@@ -145,12 +144,25 @@ void Engine::Update(float delta)
         j++;
     }
 
-    cameraTarget = meshes["earth"]->position;
+    if (selectedBody == nullptr)
+        cameraTarget = glm::vec3(0.0, 0.0, 0.0);
+    else
+        cameraTarget = glm::vec3(selectedBody->position.x, 0.0, selectedBody->position.y);
     view = glm::lookAt(glm::vec3(camX, camY, camZ) + cameraTarget, cameraTarget, glm::vec3(0.0, 1.0, 0.0));
+
+    
+    if (glfwGetMouseButton(window->ID, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+        glfwSetInputMode(window->ID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+        
+    else
+        glfwSetInputMode(window->ID, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
 }
+
+char bodyName[128] = "";
 
 void Engine::UpdateUI(float delta)
 {
+    // Scene Panel
     ImGui::SetNextWindowPos(ImVec2(0, 0));
     ImGui::SetNextWindowSize(ImVec2(PANEL_WIDTH, Engine::window->getHeight()));
     ImGui::Begin(
@@ -160,7 +172,151 @@ void Engine::UpdateUI(float delta)
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoCollapse
     );
-    ImGui::Text("New window!!");
+    if (ImGui::Button("Add Body"))
+    {
+        strcpy(bodyName, "");
+        ImGui::OpenPopup("Create Body");
+    }
+    if (ImGui::BeginPopupModal("Create Body", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
+    {
+        bool enterPressed = ImGui::InputText("Name", bodyName, IM_ARRAYSIZE(bodyName), ImGuiInputTextFlags_EnterReturnsTrue);
+
+        if (enterPressed || ImGui::Button("Create"))
+        {
+            std::string id = "body_" + std::to_string(bodyID);
+            std::string name = bodyName;
+
+            if (name.empty())
+                name = "Body";
+
+            meshes[id] = std::make_unique<Mesh>(
+                sphereData.first,
+                sphereData.second,
+                std::make_unique<BasicMaterial>(
+                    std::make_unique<Shader>(
+                        "res/shaders/vert.glsl",
+                        "res/shaders/frag.glsl"
+                    )
+                )
+            );
+
+            meshes[id]->material->parameter["isLightSource"] = false;
+            meshes[id]->material->parameter["material.albedo"] = glm::vec3(1.0);
+            meshes[id]->material->parameter["material.useDiffuse"] = false;
+            meshes[id]->material->parameter["material.diffuse"] = textures["earth"];
+            meshes[id]->material->parameter["material.specular"] = glm::vec3(0.5);
+            meshes[id]->material->parameter["material.shininess"] = 32.0f;
+
+            celestial_bodies.push_back(std::make_unique<CelestialBody>(
+                name,
+                id,
+                1.0f,
+                1.0f,
+                glm::vec2(0.0f),
+                glm::vec2(0.0f)
+            ));
+
+            bodyID++;
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::SameLine();
+
+        if (ImGui::Button("Cancel"))
+        {
+            ImGui::CloseCurrentPopup();
+        }
+
+        ImGui::EndPopup();
+    }
+    for (const auto& body : celestial_bodies)
+    {
+        bool selected = (selectedBody == body.get());
+        if (ImGui::Selectable(body->name.c_str(), selected))
+        {
+            selectedBody = body.get();
+        }
+    }
+    ImGui::End();
+
+    // Properties Panel
+    ImGui::SetNextWindowPos(ImVec2(Engine::window->getWidth() - PANEL_WIDTH, 0));
+    ImGui::SetNextWindowSize(ImVec2(PANEL_WIDTH, Engine::window->getHeight()));
+    ImGui::Begin(
+        "Properties",
+        nullptr,
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoCollapse
+    );
+    if (selectedBody)
+    {
+        ImGui::InputText("Name", &selectedBody->name);
+        ImGui::DragFloat("Mass", &selectedBody->mass, 1, 0.1, FLT_MAX);
+        selectedBody->mass = std::max(0.1f, selectedBody->mass);
+        ImGui::DragFloat("Radius", &selectedBody->radius, 0.1, 0.1, FLT_MAX);
+        selectedBody->radius = std::max(0.1f, selectedBody->radius);
+        ImGui::DragFloat2("Position", &selectedBody->position.x);
+        ImGui::DragFloat2("Velocity", &selectedBody->velocity.x);
+
+        auto& isLightSource = std::get<bool>(meshes[selectedBody->meshID.c_str()]->material->parameter["isLightSource"]);
+        ImGui::Checkbox("Is Light Source", &isLightSource);
+        auto& albedo = std::get<glm::vec3>(meshes[selectedBody->meshID.c_str()]->material->parameter["material.albedo"]);
+        ImGui::ColorEdit3("Albedo", &albedo.x);
+        if (!isLightSource)
+        {
+            if (lights.contains(selectedBody->meshID))
+                lights.erase(selectedBody->meshID);
+            auto& specular = std::get<glm::vec3>(meshes[selectedBody->meshID.c_str()]->material->parameter["material.specular"]);
+            ImGui::ColorEdit3("Specular", &specular.x);
+            auto& shininess = std::get<float>(meshes[selectedBody->meshID.c_str()]->material->parameter["material.shininess"]);
+            ImGui::DragFloat("Shininess", &shininess, 1.0, 4, 64);
+            shininess = std::max(4.0f, shininess);
+        }
+        auto& useDiffuse = std::get<bool>(meshes[selectedBody->meshID.c_str()]->material->parameter["material.useDiffuse"]);
+        ImGui::Checkbox("Diffuse Map", &useDiffuse);
+        if (useDiffuse)
+        {
+            auto& diffuse = std::get<std::shared_ptr<Texture>>(meshes[selectedBody->meshID.c_str()]->material->parameter["material.diffuse"]);
+            const char* current = "None";
+            for (const auto& [name, tex] : textures)
+            {
+                if (tex == diffuse)
+                {
+                    current = name.c_str();
+                    break;
+                }
+            }
+            if (ImGui::BeginCombo("Texture", current))
+            {
+                for (const auto& [name, tex] : textures)
+                {
+                    bool selected = (tex == diffuse);
+                    if (ImGui::Selectable(name.c_str(), selected))
+                        diffuse = tex;
+                    if (selected)
+                        ImGui::SetItemDefaultFocus();
+                }
+                ImGui::EndCombo();
+            }
+            if (diffuse)
+            {
+                float previewWidth = ImGui::GetContentRegionAvail().x;
+                float previewHeight = previewWidth * ((float)diffuse->height / diffuse->width);
+
+                ImGui::Image((ImTextureID)(intptr_t)diffuse->ID, ImVec2(previewWidth, previewHeight));
+            }
+        }
+        if (isLightSource) {
+            if (!lights.contains(selectedBody->meshID))
+                lights[selectedBody->meshID] = std::make_unique<Light>();
+            lights[selectedBody->meshID]->ambient = albedo * 0.2f;
+            lights[selectedBody->meshID]->diffuse = albedo * 0.5f;
+            ImGui::ColorEdit3("Specular", &lights[selectedBody->meshID]->specular.x);
+            ImGui::DragFloat("Linear", &lights[selectedBody->meshID]->linear, 0.000001, 0.000001, 1.0, "%.6f");
+            ImGui::DragFloat("Quadratic", &lights[selectedBody->meshID]->quadratic, 0.000001, 0.000001, 1.0, "%.6f");
+        }
+    }
     ImGui::End();
 
     ImGui::Render();
@@ -176,12 +332,15 @@ void Engine::End()
 
 void Engine::MouseMovement(float xoffset, float yoffset)
 {
-    yaw -= xoffset * 0.1;
+    if (glfwGetInputMode(window->ID, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
+    {
+        yaw -= xoffset * 0.1;
 
-    if (pitch - yoffset * 0.1 > 89)
-        pitch = 89;
-    else if (pitch - yoffset * 0.1 < -89)
-        pitch = -89;
-    else
-        pitch -= yoffset * 0.1;
+        if (pitch - yoffset * 0.1 > 89)
+            pitch = 89;
+        else if (pitch - yoffset * 0.1 < -89)
+            pitch = -89;
+        else
+            pitch -= yoffset * 0.1;
+    }
 }

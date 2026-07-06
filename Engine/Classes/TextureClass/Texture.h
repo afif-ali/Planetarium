@@ -10,6 +10,7 @@ public:
     unsigned int ID;
     GLenum type;
     unsigned int slot;
+    int width, height, nrChannels;
 
     Texture(const char *image, GLenum texType, unsigned int slot, GLenum format);
     ~Texture();

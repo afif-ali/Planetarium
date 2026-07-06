@@ -43,7 +43,6 @@ void Engine::Run()
 {
     Engine::Begin();
     
-    glfwSetInputMode(window->ID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     //glfwSwapInterval(1);
 
     float lastFrame = 0.0f;

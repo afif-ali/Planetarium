@@ -30,7 +30,7 @@ struct Light {
 uniform Material material;
 
 uniform vec3 viewPos;
-uniform bool isLightSource;
+uniform bool isLightSource = false;
 
 #define MAX_LIGHTS 8
 uniform int lightCount;
@@ -69,7 +69,7 @@ void main()
             float dist = length(lights[i].position - FragPos);
             float attenuation = 1.0 / (lights[i].constant + lights[i].linear*dist + lights[i].quadratic*dist*dist);
 
-            result += attenuation * (ambient + diffuse + specular);
+            result += attenuation * (ambient + diffuse + specular) + objectColor * 0.1;
         }
     }
     else result = objectColor;

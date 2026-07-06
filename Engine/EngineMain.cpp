@@ -5,7 +5,7 @@
 
 int main()
 {
-    Engine::Init(1080, 720, "Planetarium");
+    Engine::Init(1920, 1080, "Planetarium");
     Engine::Run();
     glfwTerminate();
     return 0;
