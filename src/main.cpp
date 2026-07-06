@@ -6,6 +6,7 @@
 #include <Engine.h>
 
 #include <cfloat>
+#include <algorithm>
 
 #include "Sphere/Sphere.h"
 #include "Grid/Grid.h"
@@ -15,8 +16,10 @@
 
 const float CAMERA_RADIUS = 40.0f;
 const float GRAVITATIONAL_CONSTANT = 9.8;
-const float SIMULATION_SPEED = 0.0;
 const unsigned int PANEL_WIDTH = 300;
+const unsigned int PANEL_HEIGHT = 300;
+
+bool simulating = false;
 
 glm::vec3 cameraTarget;
 float yaw = 0.0;
@@ -46,7 +49,7 @@ void Engine::Begin()
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
     ImGuiIO& io = ImGui::GetIO(); (void) io;
-    ImGui::StyleColorsClassic();
+    ImGui::StyleColorsDark();
     ImGui_ImplGlfw_InitForOpenGL(window->ID, true);
     ImGui_ImplOpenGL3_Init("#version 460");
 
@@ -99,16 +102,57 @@ void Engine::Update(float delta)
     float camZ = cos(glm::radians(yaw)) * cos(glm::radians(pitch)) * cam_radius;
 
     // Calculate all gravity interactions
-    if (SIMULATION_SPEED < 0.0)
+    if (simulating)
     {
+        std::vector<int> bodiesToDelete;
+
         for (int i=0; i<celestial_bodies.size(); i++)
         {
             for (int j=0; j<celestial_bodies.size(); j++)
             {
                 if (i==j) continue;
 
-                applyGravity(*celestial_bodies[i], *celestial_bodies[j]);
+                glm::vec2 dist = celestial_bodies[i]->position - celestial_bodies[j]->position;
+                float distanceSquared = glm::dot(dist, dist);
+                float radiusSum = celestial_bodies[i]->radius + celestial_bodies[j]->radius;
+
+                if (distanceSquared <= radiusSum * radiusSum)
+                {
+                    int bigger, smaller;
+                    if (celestial_bodies[i]->radius < celestial_bodies[j]->radius) {
+                        bigger = j;
+                        smaller = i;
+                    } else {
+                        bigger = i;
+                        smaller = j;
+                    }
+                    bodiesToDelete.push_back(smaller);
+                    meshes.erase(celestial_bodies[smaller]->meshID);
+                    lights.erase(celestial_bodies[smaller]->meshID);
+
+                    float r1 = celestial_bodies[bigger]->radius;
+                    float r2 = celestial_bodies[smaller]->radius;
+                    celestial_bodies[bigger]->radius = std::cbrt(r1 * r1 * r1 + r2 * r2 * r2);
+
+                    celestial_bodies[bigger]->mass += celestial_bodies[smaller]->mass;
+
+                    if (selectedBody->meshID == celestial_bodies[smaller]->meshID)
+                    {
+                        selectedBody = celestial_bodies[bigger].get();
+                    }
+                }
+                else
+                {
+                    applyGravity(*celestial_bodies[i], *celestial_bodies[j]);
+                }
             }
+        }
+
+        std::sort(bodiesToDelete.begin(), bodiesToDelete.end());
+        bodiesToDelete.erase(std::unique(bodiesToDelete.begin(), bodiesToDelete.end()), bodiesToDelete.end());
+        for (auto it = bodiesToDelete.rbegin(); it != bodiesToDelete.rend(); ++it)
+        {
+            celestial_bodies.erase(celestial_bodies.begin() + *it);
         }
     }
 
@@ -117,7 +161,7 @@ void Engine::Update(float delta)
     for (int i=0; i<celestial_bodies.size(); i++)
     {
         // Apply gravity
-        celestial_bodies[i]->applyVelocity(SIMULATION_SPEED * delta);
+        celestial_bodies[i]->applyVelocity(delta * simulating);
 
         // Adjust grid to new mass parameters
         std::string base = "masses[" + std::to_string(i) + "]";
@@ -159,8 +203,8 @@ void Engine::Update(float delta)
     view = glm::lookAt(glm::vec3(camX, camY, camZ) + cameraTarget, cameraTarget, glm::vec3(0.0, 1.0, 0.0));
     meshes["sky"]->position = glm::vec3(camX, camY, camZ) + cameraTarget;
 
-    
-    if (glfwGetMouseButton(window->ID, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
+    ImGuiIO& io = ImGui::GetIO();
+    if (glfwGetMouseButton(window->ID, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS && !io.WantCaptureMouse)
         glfwSetInputMode(window->ID, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         
     else
@@ -181,10 +225,13 @@ void Engine::UpdateUI(float delta)
         ImGuiWindowFlags_NoResize |
         ImGuiWindowFlags_NoCollapse
     );
-    if (ImGui::Button("Add Body"))
+    if (!simulating)
     {
-        strcpy(bodyName, "");
-        ImGui::OpenPopup("Create Body");
+        if (ImGui::Button("Add Body", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+        {
+            strcpy(bodyName, "");
+            ImGui::OpenPopup("Create Body");
+        }
     }
     if (ImGui::BeginPopupModal("Create Body", nullptr, ImGuiWindowFlags_AlwaysAutoResize))
     {
@@ -250,7 +297,7 @@ void Engine::UpdateUI(float delta)
 
     // Properties Panel
     ImGui::SetNextWindowPos(ImVec2(Engine::window->getWidth() - PANEL_WIDTH, 0));
-    ImGui::SetNextWindowSize(ImVec2(PANEL_WIDTH, Engine::window->getHeight()));
+    ImGui::SetNextWindowSize(ImVec2(PANEL_WIDTH, Engine::window->getHeight() - PANEL_HEIGHT));
     ImGui::Begin(
         "Properties",
         nullptr,
@@ -328,6 +375,31 @@ void Engine::UpdateUI(float delta)
     }
     ImGui::End();
 
+    ImGui::SetNextWindowPos(ImVec2(Engine::window->getWidth() - PANEL_WIDTH, Engine::window->getHeight() - PANEL_HEIGHT));
+    ImGui::SetNextWindowSize(ImVec2(PANEL_WIDTH, PANEL_HEIGHT));
+    ImGui::Begin(
+        "Simulation",
+        nullptr,
+        ImGuiWindowFlags_NoMove |
+        ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoCollapse
+    );
+    if (!simulating)
+    {
+        if (ImGui::Button("Start", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+        {
+            simulating = true;
+        }
+    }
+    else
+    {   
+        if (ImGui::Button("Stop", ImVec2(ImGui::GetContentRegionAvail().x, 0)))
+        {
+            simulating = false;
+        }
+    }
+    ImGui::End();
+
     ImGui::Render();
     ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 }
@@ -341,6 +413,11 @@ void Engine::End()
 
 void Engine::MouseMovement(float xoffset, float yoffset)
 {
+    ImGuiIO& io = ImGui::GetIO();
+
+    if (io.WantCaptureMouse)
+        return;
+
     if (glfwGetInputMode(window->ID, GLFW_CURSOR) == GLFW_CURSOR_DISABLED)
     {
         yaw -= xoffset * 0.1;
@@ -356,6 +433,11 @@ void Engine::MouseMovement(float xoffset, float yoffset)
 
 void Engine::MouseScroll(float xoffset, float yoffset)
 {
+    ImGuiIO& io = ImGui::GetIO();
+
+    if (io.WantCaptureMouse)
+        return;
+
     scroll_amount -= 0.1 * yoffset;
     scroll_amount = glm::clamp(scroll_amount, 0.0f, 1.0f);
 }
