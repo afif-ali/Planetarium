@@ -13,7 +13,7 @@
 
 
 
-const float CAMERA_RADIUS = 15.0f;
+const float CAMERA_RADIUS = 40.0f;
 const float GRAVITATIONAL_CONSTANT = 9.8;
 const float SIMULATION_SPEED = 0.0;
 const unsigned int PANEL_WIDTH = 300;
@@ -21,8 +21,9 @@ const unsigned int PANEL_WIDTH = 300;
 glm::vec3 cameraTarget;
 float yaw = 0.0;
 float pitch = 20.0;
+float scroll_amount = 0.5;
 
-std::pair<std::vector<Vertex>, std::vector<unsigned int>> sphereData = getSphereData(24, 24);
+std::pair<std::vector<Vertex>, std::vector<unsigned int>> sphereData = getSphereData(24, 24, false);
 
 std::vector<std::unique_ptr<CelestialBody>> celestial_bodies;
 int bodyID = 0;
@@ -73,6 +74,10 @@ void Engine::Begin()
     meshes["grid"] = std::make_unique<Mesh>(gridData.first, gridData.second, std::make_unique<BasicMaterial>( std::make_unique<Shader>("res/shaders/grid/vert.glsl", "res/shaders/grid/frag.glsl") ));
     meshes["grid"]->DrawLines = true;
     meshes["grid"]->material->parameter["gridRadius"] = 2000.0f;
+
+    std::pair<std::vector<Vertex>, std::vector<unsigned int>> skyData = getSphereData(48, 48, true);
+    meshes["sky"] = std::make_unique<Mesh>(skyData.first, skyData.second, std::make_unique<BasicMaterial>( std::make_unique<Shader>("res/shaders/sky/vert.glsl", "res/shaders/sky/frag.glsl") ));
+    meshes["sky"]->material->parameter["skyTexture"] = std::make_shared<Texture>("res/textures/sky.jpg", GL_TEXTURE_2D, 15, GL_RGB);
 }
 
 
@@ -85,10 +90,13 @@ void Engine::Update(float delta)
     ImGui_ImplOpenGL3_NewFrame();
     ImGui_ImplGlfw_NewFrame();
     ImGui::NewFrame();
-    
-    float camX = sin(glm::radians(yaw)) * cos(glm::radians(pitch)) * CAMERA_RADIUS;
-    float camY = sin(glm::radians(pitch)) * CAMERA_RADIUS;
-    float camZ = cos(glm::radians(yaw)) * cos(glm::radians(pitch)) * CAMERA_RADIUS;
+
+    float cam_radius;
+    if (selectedBody == nullptr) cam_radius = 100;
+    else cam_radius = selectedBody->radius * glm::mix(2.0f, CAMERA_RADIUS, scroll_amount);
+    float camX = sin(glm::radians(yaw)) * cos(glm::radians(pitch)) * cam_radius;
+    float camY = sin(glm::radians(pitch)) * cam_radius;
+    float camZ = cos(glm::radians(yaw)) * cos(glm::radians(pitch)) * cam_radius;
 
     // Calculate all gravity interactions
     if (SIMULATION_SPEED < 0.0)
@@ -149,6 +157,7 @@ void Engine::Update(float delta)
     else
         cameraTarget = glm::vec3(selectedBody->position.x, 0.0, selectedBody->position.y);
     view = glm::lookAt(glm::vec3(camX, camY, camZ) + cameraTarget, cameraTarget, glm::vec3(0.0, 1.0, 0.0));
+    meshes["sky"]->position = glm::vec3(camX, camY, camZ) + cameraTarget;
 
     
     if (glfwGetMouseButton(window->ID, GLFW_MOUSE_BUTTON_RIGHT) == GLFW_PRESS)
@@ -254,8 +263,8 @@ void Engine::UpdateUI(float delta)
         ImGui::InputText("Name", &selectedBody->name);
         ImGui::DragFloat("Mass", &selectedBody->mass, 1, 0.1, FLT_MAX);
         selectedBody->mass = std::max(0.1f, selectedBody->mass);
-        ImGui::DragFloat("Radius", &selectedBody->radius, 0.1, 0.1, FLT_MAX);
-        selectedBody->radius = std::max(0.1f, selectedBody->radius);
+        ImGui::DragFloat("Radius", &selectedBody->radius, 0.1, 0.1, 50.0f);
+        selectedBody->radius = std::min(std::max(0.1f, selectedBody->radius), 50.0f);
         ImGui::DragFloat2("Position", &selectedBody->position.x);
         ImGui::DragFloat2("Velocity", &selectedBody->velocity.x);
 
@@ -343,4 +352,10 @@ void Engine::MouseMovement(float xoffset, float yoffset)
         else
             pitch -= yoffset * 0.1;
     }
+}
+
+void Engine::MouseScroll(float xoffset, float yoffset)
+{
+    scroll_amount -= 0.1 * yoffset;
+    scroll_amount = glm::clamp(scroll_amount, 0.0f, 1.0f);
 }

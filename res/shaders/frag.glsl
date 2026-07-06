@@ -37,7 +37,6 @@ uniform int lightCount;
 uniform Light lights[MAX_LIGHTS];
 
 
-
 void main()
 {
     vec3 result;
@@ -69,9 +68,15 @@ void main()
             float dist = length(lights[i].position - FragPos);
             float attenuation = 1.0 / (lights[i].constant + lights[i].linear*dist + lights[i].quadratic*dist*dist);
 
-            result += attenuation * (ambient + diffuse + specular) + objectColor * 0.1;
+            result += attenuation * (ambient + diffuse + specular);
         }
     }
-    else result = objectColor;
+    else 
+    {
+        vec3 norm = normalize(Normal);
+        vec3 viewDir = normalize(viewPos - FragPos);
+        float fresnel = pow(1.0 - max(dot(norm, viewDir), 0.0), 4.0);
+        result = objectColor * 2.0 + material.albedo * fresnel * 3.0;
+    }
     FragColor = vec4(result, 1.0f);
 }

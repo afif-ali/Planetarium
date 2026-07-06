@@ -25,6 +25,7 @@ private:
     inline static float lastY = 0.0f;
     inline static bool firstMouse = true;
     static void mouse_callback(GLFWwindow* window, double xpos, double ypos);
+    static void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
 
 public:
     inline static std::unique_ptr<Window> window = nullptr;
@@ -42,4 +43,5 @@ public:
     static void UpdateUI(float delta);
     static void End();
     static void MouseMovement(float xoffset, float yoffset);
+    static void MouseScroll(float xoffset, float yoffset);
 };

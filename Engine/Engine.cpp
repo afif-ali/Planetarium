@@ -18,6 +18,11 @@ void Engine::mouse_callback(GLFWwindow *window, double xpos, double ypos)
     MouseMovement(xoffset, yoffset);
 }
 
+void Engine::scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    Engine::MouseScroll(xoffset, yoffset);
+}
+
 void Engine::Init(unsigned int height, unsigned int width, const char *title)
 {
     if (!glfwInit())
@@ -37,6 +42,7 @@ void Engine::Init(unsigned int height, unsigned int width, const char *title)
     lastY = height / 2;
 
     glfwSetCursorPosCallback(window->ID, mouse_callback);
+    glfwSetScrollCallback(window->ID, scroll_callback);
 }
 
 void Engine::Run()
@@ -73,7 +79,7 @@ void Engine::Run()
         
         Engine::Update(delta);
 
-        glm::mat4 projection = glm::perspective(glm::radians(60.0f), ((float) Engine::window->getWidth() - Engine::window->viewportOffsetLeft - Engine::window->viewportOffsetRight) / (Engine::window->getHeight() - Engine::window->viewportOffsetBottom - Engine::window->viewportOffsetTop), 0.1f, 1000.0f);
+        glm::mat4 projection = glm::perspective(glm::radians(60.0f), ((float) Engine::window->getWidth() - Engine::window->viewportOffsetLeft - Engine::window->viewportOffsetRight) / (Engine::window->getHeight() - Engine::window->viewportOffsetBottom - Engine::window->viewportOffsetTop), 0.1f, 2000.0f);
         for (const auto& [key, mesh] : meshes) {
             mesh->material->shader->Use();
             glUniformMatrix4fv(mesh->material->shader->Uniform("view"), 1, GL_FALSE, glm::value_ptr(view));

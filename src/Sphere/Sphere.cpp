@@ -1,6 +1,6 @@
 #include "Sphere.h"
 
-std::pair<std::vector<Vertex>, std::vector<unsigned int>> getSphereData(int sub_vertical, int sub_horizontal)
+std::pair<std::vector<Vertex>, std::vector<unsigned int>> getSphereData(int sub_vertical, int sub_horizontal, bool inside)
 {
     std::vector<Vertex> vertices;
     std::vector<unsigned int> indices;
@@ -26,13 +26,26 @@ std::pair<std::vector<Vertex>, std::vector<unsigned int>> getSphereData(int sub_
     {
         for (int j=0; j<sub_horizontal; j++)
         {
-            indices.push_back((j+0) + (i+0)*(sub_horizontal+1));
-            indices.push_back((j+0) + (i+1)*(sub_horizontal+1));
-            indices.push_back((j+1) + (i+1)*(sub_horizontal+1));
-            
-            indices.push_back((j+1) + (i+0)*(sub_horizontal+1));
-            indices.push_back((j+0) + (i+0)*(sub_horizontal+1));
-            indices.push_back((j+1) + (i+1)*(sub_horizontal+1));
+            if (!inside)
+            {
+                indices.push_back((j+0) + (i+0)*(sub_horizontal+1));
+                indices.push_back((j+0) + (i+1)*(sub_horizontal+1));
+                indices.push_back((j+1) + (i+1)*(sub_horizontal+1));
+                
+                indices.push_back((j+1) + (i+0)*(sub_horizontal+1));
+                indices.push_back((j+0) + (i+0)*(sub_horizontal+1));
+                indices.push_back((j+1) + (i+1)*(sub_horizontal+1));
+            }
+            else
+            {
+                indices.push_back((j+1) + (i+1)*(sub_horizontal+1));
+                indices.push_back((j+0) + (i+1)*(sub_horizontal+1));
+                indices.push_back((j+0) + (i+0)*(sub_horizontal+1));
+                
+                indices.push_back((j+1) + (i+1)*(sub_horizontal+1));
+                indices.push_back((j+0) + (i+0)*(sub_horizontal+1));
+                indices.push_back((j+1) + (i+0)*(sub_horizontal+1));
+            }
         }
     }
 
