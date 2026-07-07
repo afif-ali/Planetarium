@@ -13,7 +13,7 @@ include_directories(${PROJECT_NAME} lib/glad/include/ lib/glfw-3.4/include/ lib/
 file(GLOB_RECURSE ENGINE_SOURCES "Engine/*.cpp")
 file(GLOB_RECURSE PROJECT_SOURCES "src/*.cpp")
 file(GLOB_RECURSE IMGUI_SOURCES "lib/imgui/*.cpp")
-add_executable(${PROJECT_NAME} ${ENGINE_SOURCES} ${PROJECT_SOURCES} ${IMGUI_SOURCES} lib/glad/src/glad.c lib/stb_image/stb_image.cpp)
+add_executable(${PROJECT_NAME} WIN32 ${ENGINE_SOURCES} ${PROJECT_SOURCES} ${IMGUI_SOURCES} lib/glad/src/glad.c lib/stb_image/stb_image.cpp icon.rc)
 
 target_link_libraries(${PROJECT_NAME} glfw)
 

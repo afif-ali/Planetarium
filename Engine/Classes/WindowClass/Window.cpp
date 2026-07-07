@@ -17,6 +17,20 @@ Window::Window(unsigned int width, unsigned int height, const char *title)
         glfwTerminate();
     }
 
+    int icon_w, icon_h, icon_c;
+
+    icon.pixels = stbi_load("res/app.png", &icon_w, &icon_h, &icon_c, 4);
+
+    if (icon.pixels)
+    {
+        icon.width = icon_w;
+        icon.height = icon_h;
+
+        glfwSetWindowIcon(ID, 1, &icon);
+
+        stbi_image_free(icon.pixels);
+    }
+
     m_Width = width;
     m_Height = height;
     m_Title = title;

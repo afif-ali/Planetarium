@@ -3,6 +3,7 @@
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include "stb_image.h"
 
 #include <iostream>
 
@@ -17,6 +18,7 @@ private:
 
 public:
     GLFWwindow* ID = nullptr;
+    GLFWimage icon{};
     inline static unsigned int viewportOffsetTop = 0;
     inline static unsigned int viewportOffsetLeft = 0;
     inline static unsigned int viewportOffsetBottom = 0;
